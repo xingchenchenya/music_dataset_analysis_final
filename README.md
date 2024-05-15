@@ -1,5 +1,5 @@
-# music_dataset_analysisi_final_task
-
+# music_dataset_analysis
+ 
 by 2021214262-chenshiyu
-
-the dataset is from https://www.kaggle.com/datasets/revilrosa/music-label-dataset/data
+This project is the implementation code for my final assignment of the big data course.
+And, the music dataset is from https://www.kaggle.com/datasets/revilrosa/music-label-dataset/data
