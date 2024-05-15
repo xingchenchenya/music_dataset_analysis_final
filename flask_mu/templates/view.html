@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <title>音乐数据分析结果</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/echarts/3.6.2/echarts.min.js"></script>
+    <style>
+        body {
+            background-image: url("/static/bj.jpeg");
+        }
+        h1 {
+            color: #111;
+        } 
+         
+        #box1 { 
+            background-color: #f9fbff!important;
+            display: inline-block;
+        }
+
+        #box2 {
+            background-color: #f9fbff!important; 
+            display: inline-block;
+        } 
+
+        .contain {
+            text-align: center;
+        }
+        
+        #box3 {
+            background-color: #f9fbff!important;
+            display: inline-block; 
+            margin-top: 20px; /* 下移10px */
+            vertical-align: top; /* 上下对齐 */
+        }
+
+        #box4 {
+            background-color: #f9fbff!important;
+            display: inline-block;
+            margin-top: 20px; /* 下移10px */
+            vertical-align: top; /* 上下对齐 */
+        }
+
+        .public {
+            width: 700px;
+            height: 500px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            box-shadow: 0 0 8px #aaa inset;
+        }
+
+        .empty {
+            height: 30px;
+        }
+        table {
+            margin:10px 20px;
+            width: 95%;
+            border-collapse: separate;
+            text-align: center;
+        }
+        .title{
+            margin: 0px;
+            margin-bottom: 10px;
+            font-size: 18px;
+            font-weight: bold; /* 设置字体加粗 */
+        }
+
+        th, td {
+            border: 1px solid #ccc;
+            padding: 6px;
+            text-align: center;
+            background-color: white; /* 默认背景颜色 */
+        }
+
+        th {
+            background-color: #f2f2f2;
+        }
+
+        tr:hover td {
+            background-color: #e0e0e0; /* 鼠标滑过背景变灰 */
+        }
+    </style>
+</head>
+
+<body>
+    <h1 align="center">Spark音乐数据分析的可视化</h1>
+    <div class="empty"></div>
+    <div class="contain">
+        <div id="box1" class="public"></div>
+        <div id="box2" class="public"></div>
+        <div id="box3" class="public"></div>
+        <div id="box4" class="public"></div>
+    </div>
+
+    <script type="text/javascript">
+        $.getJSON("/static/result1.json", function(data) {
+            var genres = [];
+            var counts = [];
+
+            $.each(data, function(index, item) {
+                genres.push(item["genre"]);
+                counts.push(item["count"]);
+            });
+
+            var myChart1 = echarts.init(document.getElementById('box1'));
+
+            // 指定图表的配置项和数据
+            var option1 = {
+                title: {
+                    text: '各类型歌曲的数量统计图',
+                    x: 'center'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'shadow'
+                    }
+                },
+                xAxis: {
+                    type: 'category',
+                    data: genres,
+                    axisLabel: {
+                        interval: 0,
+                        rotate: 45
+                    }
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: [{
+                    name: '歌曲数量',
+                    type: 'bar',
+                    data: counts,
+                    itemStyle: {
+                        color: '#3398DB'
+                    }
+                }]
+            };
+
+            myChart1.setOption(option1);
+        });
+    </script>
+
+    <script type="text/javascript">
+        $.getJSON("static/result2.json", function(data) {
+            var dataAxis = []
+            var dataValue = []
+
+            $.each(data, function(key, val) {
+                dataAxis.push(val["_1"]);
+                dataValue.push(Math.abs(val["_2"]) / 1000000)
+            });
+
+            // 基于准备好的dom，初始化echarts实例
+            var myChart2 = echarts.init(document.getElementById('box2'), 'light');
+
+            var option2 = {
+                title: {
+                    text: '各类型专辑的销量统计图',
+                    x: 'center',
+                    // bottom: 10
+                    padding: [0, 0, 15, 0]
+                },
+                color: ['#3398DB'],
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: { // 坐标轴指示器，坐标轴触发有效
+                        type: 'shadow' // 默认为直线，可选为：'line' | 'shadow'
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '10%',
+                    containLabel: true
+                },
+                xAxis: [{
+                    type: 'category',
+                    data: dataAxis,
+                    axisTick: {
+                        show: true,
+                        alignWithLabel: true,
+                        interval: 0
+                    },
+                    axisLabel: {
+                        interval: 0,
+                        rotate: 45,
+                    }
+                }],
+                yAxis: [{
+                    type: 'value',
+                }],
+                series: [{
+                    name: '直接访问',
+                    type: 'bar',
+                    barWidth: '60%',
+                    data: dataValue
+                }]
+            };
+
+            // 使用刚指定的配置项和数据显示图表。
+            myChart2.setOption(option2);
+
+        })
+    </script>
+
+    <script type="text/javascript">
+        $.getJSON("static/result3.json", function(data) {
+            var table = '<table>';
+            table+='<p class=title>专辑综合评分排名榜单Top10</p>';
+            table += '<tr><th>排名</th><th>专辑标题</th><th>艺术家ID</th></tr>';
+            $.each(data, function(index, item) {
+                table += '<tr><td>' + (index + 1) + '</td><td>' + item["album_title"] + '</td><td>' + item["artist_id"] + '</td></tr>';
+            });
+            table += '</table>';
+
+            $('#box3').append(table);
+        });
+    </script>
+
+    <script type="text/javascript">
+        $.getJSON("static/result4.json", function(data) {
+            var items = {
+                "Indie": [],
+                "Pop": [],
+                "Rap": [],
+                "Latino": [],
+                "Pop-Rock": []
+            }
+            $.each(data, function(key, val) {
+                tmp = [val["_1"]["_2"], val["_2"]]
+                items[val["_1"]["_1"]].push(tmp)
+            });
+
+            var myChart4 = echarts.init(document.getElementById('box4'));
+
+            var option4 = {
+                title: {
+                    text: 'top5销量变化'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                    axisPointer: {
+                        type: 'cross',
+                        label: {
+                            backgroundColor: '#6a7985'
+                        }
+                    }
+                },
+                legend: {
+                    data: ['Indie', 'Pop', 'Rap', 'Pop-Rock', 'Latino']
+                },
+                toolbox: {
+                    feature: {
+                        //saveAsImage: {}
+                    }
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                xAxis: [{
+                    type: 'category',
+                    boundaryGap: false,
+                    data: items['Indie'].map(v => v[0])
+                }],
+                yAxis: [{
+                    type: 'value',
+                    name: 'Million Albums',
+                    nameLocation: 'middle',
+                    nameGap: 30
+                }],
+                series: [{
+                    name: 'Indie',
+                    type: 'line',
+                    stack: '总量',
+                    areaStyle: {},
+                    data: items["Indie"].map(v => v[1] / 1000000)
+                }, {
+                    name: 'Pop',
+                    type: 'line',
+                    stack: '总量',
+                    areaStyle: {},
+                    data: items["Pop"].map(v => v[1] / 1000000)
+                }, {
+                    name: 'Rap',
+                    type: 'line',
+                    stack: '总量',
+                    areaStyle: {},
+                    data: items["Rap"].map(v => v[1] / 1000000)
+                }, {
+                    name: 'Pop-Rock',
+                    type: 'line',
+                    stack: '总量',
+                    areaStyle: {},
+                    data: items["Pop-Rock"].map(v => v[1] / 1000000)
+                }, {
+                    name: 'Latino',
+                    type: 'line',
+                    stack: '总量',
+                    areaStyle: {},
+                    data: items["Latino"].map(v => v[1] / 1000000)
+                }]
+            };
+            myChart4.setOption(option4);
+        });
+    </script>
+</body>
+</html>
+
